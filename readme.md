@@ -1,6 +1,6 @@
 # PortPlow.io
 
-Manage large-scale distributed scans with a web frontend.  This project was build to be
+Manage large-scale distributed scans with a web frontend.  This project was built to be
 run on DigitalOcean on a 2-4GB ram system.
 
 ## Setup instructions
