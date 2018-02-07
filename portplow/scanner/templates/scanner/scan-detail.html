@@ -1,0 +1,130 @@
+{% extends "scanner/base.html" %}
+{% load staticfiles %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="/">Home</a></li>
+        <li><a href="{% url 'portplow:scan-list' %}">Scans</a></li>
+        <li class="active">{{ scan.name }}</li>
+    </ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    {# TODO: Emergency stop button/modal #}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Details</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Name</strong></div>
+                <div class="col-xs-10 col-md-10 col-md-10 text-left">{{ scan.name }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Profile</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">
+                    {{ scan.profile.name }}<br />
+                    <em>{{ scan.profile.tool }} {{ scan.profile.command }}</em>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Targets</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">{{ scan.hosts|linebreaksbr }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Parameters</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">Scan {{ scan.chunk_size }} IPs per scanner using {{ scan.scanner_count }} scanners</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Dates</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">{{ scan.start_date }} to {{ scan.stop_date }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Hours</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">{{ scan.scan_hours }}</div>
+            </div>
+            <div class="row">
+                <div class="col-xs-2 col-md-2 text-right"><strong>Progress</strong></div>
+                <div class="col-xs-10 col-md-10 text-left">{{ scan.progress.percentage }} ({{ scan.progress.completed }} complete, {{ scan.progress.pending }} pending, {{ scan.progress.failed }} failed, {{ scan.progress.executing }} executing)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Scanners</h3>
+        </div>
+        <div class="panel-body">
+            {% if request.user.is_superuser %}
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <button class="btn btn-xs">Add Scanner</button>
+                    <button class="btn btn-xs">Remove Scanner</button>
+                </div>
+            </div>
+            {% endif %}
+            {% if scan.scanners.count == 0 %}
+                No scanners are present for this scan.
+            {% else %}
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>IP</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for scanner in scan.scanners.all %}
+                    <tr>
+                        <td>{{ scanner.name }}</td>
+                        <td>{{ scanner.ip }}</td>
+                        <td>{{ scanner.status }}</td>
+                        <td></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Jobs</h3>
+        </div>
+        <div class="panel-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th class="col-xs-1 col-md-1"># Attempts</th>
+                    <th class="col-xs-1 col-md-1">Status</th>
+                    {% if request.user.is_superuser %}<th class="col-xs-2 col-md-2">Actions</th>{% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for job in scan.jobs.all %}
+                <tr>
+                    <td>{{ job.id }}</td>
+                    <td>{{ job.attempts }}</td>
+                    <td>{{ job.status }}</td>
+                    {% if request.user.is_superuser %}<td></td>{% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% comment %}<div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Files</h3>
+        </div>
+        <div class="panel-body">
+            List of files.
+        </div>
+    </div>{% endcomment %}
+
+{% endblock %}

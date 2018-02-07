@@ -1,0 +1,80 @@
+{% extends "scanner/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Scanners{% endblock title %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li class="active">Scanners</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Scanners</h3>
+        </div>
+        <div class="panel-body">
+            {% if scanners.count == 0 %}
+            No scanners are listed in the database.
+            {% else %}
+                {% regroup scanners by scan.name as scan_list %}
+                {% for scan in scan_list %}
+                    <h4>{{ scan.grouper }}</h4>
+                    <table class="table table-responsive">
+                        {% for scanner in scan.list %}
+                        <tr>
+                            <td class="col-md-offset-1 col-md-2">{{ scanner.ip|default_if_none:"Unknown" }}</td>
+                            <td class="col-md-2">{{ scanner.get_status_display }}</td>
+                            <td class="col-md-2">
+                                <span class="hidden-xs">{{ scanner.last_seen|date:"Y/m/d" }} {{ scanner.last_seen|time:"H:i:s" }}</span>
+                                <span class="visible-xs">{{ scanner.last_seen|date:"y/m/d" }}<br />{{ scanner.last_seen|time:"H:i:s" }}</span>
+                            </td>
+                            <td class="col-md-3">
+                                {% if scanner.executing_jobs.count == 0 %}
+                                    No running jobs.
+                                {% endif %}
+                                {% for job in scanner.executing_jobs.all %}
+                                    {{ job.id }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                {% endfor %}
+
+
+            {% comment %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Test Name</th>
+                    <th>Status</th>
+                    <th>Current Job</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for scan in scan_list %}
+                    <tr>
+                        <td colspan="4"><em>{{ scan.grouper }}</em></td>
+                    </tr>
+                    {% for scanner in scan.list %}
+                    <tr>
+                        <td class="col-md-offset-1">{{ scanner.ip|default_if_none:"Unknown" }}</td>
+                        <td>{{ scanner.scan.name }}</td>
+                        <td>{{ scanner.get_status_display }}</td>
+                        <td>
+                            {% for job in scanner.executing_jobs.all %}
+                                {{ job.id }}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>{% endcomment %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

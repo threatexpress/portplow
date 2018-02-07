@@ -1,0 +1,25 @@
+[digitalocean]
+api_key = --api-token--
+
+[external]
+ip = --public-ip--
+port = 443
+domain = --domain--
+
+[email]
+use_tls = True
+from_email = support@domain.io
+server_email = support@domain.io
+host = mail.privateemail.com
+port = 26
+user = --email-user--
+password = --email-pass--
+
+[database]
+user = portplow
+password = --db-pass--
+database = portplow
+
+[internal]
+site_name = internaldomain.io
+secret_key = --secret-key--

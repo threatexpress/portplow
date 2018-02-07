@@ -1,0 +1,41 @@
+{% extends "scanner/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Profiles{% endblock title %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li><a href="">Profiles</a></li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Groups {% comment %}{% if request.user.is_superuser %}<a href="{% url 'portplow:profile-create' %}"><span class="btn btn-default btn-xs">New Profile</span></a>{% endif %}{% endcomment %}</h3>
+        </div>
+        <div class="panel-body">
+            {% if profiles.count == 0 %}
+            No profiles are listed in the database.
+            {% else %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th class="col-md-4">Name</th>
+                    {% comment %}<th class="col-md-2"># of Users</th>{% endcomment %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for group in groups %}
+                <tr>
+                    <td>{{ group.name }}</td>
+                    {% comment %}<td>{{ group.users.count }}</td>{% endcomment %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

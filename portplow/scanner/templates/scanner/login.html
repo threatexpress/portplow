@@ -1,0 +1,66 @@
+{% extends "scanner/base_no-header.html" %}
+{% block title %}PortPlow.io - Login{% endblock %}
+
+{% block content %}
+{#	<h1 class="form-header">Sign in to your Account</h1>#}
+
+    <div class="col-md-4 col-md-offset-4">
+
+        <!-- Form -->
+        <form action="{% url 'portplow:login' %}" id="signin-form_id" class="panel" method="post">
+            {% csrf_token %}
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+            {% if form.errors %}
+            <div class="form-actions">
+                <p>Your username and password didn't match. Please try again.</p>
+            </div>
+            {% endif %}
+            <div class="form-group w-icon">
+                <input type="text" name="username" id="username_id" class="form-control input-lg" placeholder="Username">
+                {% comment %}<span class="fa fa-user signin-form-icon"></span>{% endcomment %}
+            </div> <!-- / Username -->
+
+            <div class="form-group w-icon">
+                <input type="password" name="password" id="password_id" class="form-control input-lg" placeholder="Password">
+                {% comment %}<span class="fa fa-lock signin-form-icon"></span>{% endcomment %}
+            </div> <!-- / Password -->
+
+
+            <div class="form-actions">
+                <input type="submit" value="Sign In" class="btn btn-primary btn-block btn-lg">
+            </div> <!-- / .form-actions -->
+        </form>
+        <!-- / Form -->
+
+        {% comment %}<div class="signin-with">
+            <div class="header">or sign in with</div>
+            <a href="index.html" class="btn btn-lg btn-facebook rounded"><i class="fa fa-facebook"></i></a>&nbsp;&nbsp;
+            <a href="index.html" class="btn btn-lg btn-info rounded"><i class="fa fa-twitter"></i></a>&nbsp;&nbsp;
+            <a href="index.html" class="btn btn-lg btn-danger rounded"><i class="fa fa-google-plus"></i></a>
+        </div>{% endcomment %}
+    </div>
+{% endblock %}
+
+{% block tail_js %}
+<script type="text/javascript">
+	window.PixelAdmin.start([
+		function () {
+			$("#signin-form_id").validate({ focusInvalid: true, errorPlacement: function () {} });
+			
+			// Validate username
+			$("#username_id").rules("add", {
+				required: true,
+				minlength: 3
+			});
+
+			// Validate password
+			$("#password_id").rules("add", {
+				required: true,
+				minlength: 6
+			});
+		}
+	]);
+</script>
+{% endblock %}

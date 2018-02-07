@@ -1,0 +1,165 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PortPlow - {% block title %}Administration{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+          integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
+    <!-- Optional theme -->
+    {% comment %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+          integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
+    {% endcomment %}
+    <link rel="stylesheet" href="{% static 'css/portplow.css' %}"/>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.1/css/font-awesome.min.css" />
+
+    <link rel="stylesheet" href="{% static 'libs/bootstrap-daterangepicker/daterangepicker.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css/sticky-footer-navbar.css' %}"/>
+
+    <style type="text/css">
+        body {
+            padding-top: 20px;
+        }
+
+        .navbar-right {
+          padding-right: 20px;
+        }
+
+        .navbar-brand img {
+            padding: 0px;
+            /*in-width: 120px;*/
+            white-space: nowrap;
+            display:inline-block;
+            max-height: 30px;
+            margin-top: -10px;
+
+        }
+        .text-xs-left { text-align: left; }
+        .text-xs-right { text-align: right; }
+        .text-xs-center { text-align: center; }
+        .text-xs-justify { text-align: justify; }
+
+        @media (min-width: 768px) {
+            .text-sm-left { text-align: left; }
+            .text-sm-right { text-align: right; }
+            .text-sm-center { text-align: center; }
+            .text-sm-justify { text-align: justify; }
+        }
+
+        @media (min-width: 992px) {
+            .text-md-left { text-align: left; }
+            .text-md-right { text-align: right; }
+            .text-md-center { text-align: center; }
+            .text-md-justify { text-align: justify; }
+        }
+
+        @media (min-width: 1200px) {
+            .text-lg-left { text-align: left; }
+            .text-lg-right { text-align: right; }
+            .text-lg-center { text-align: center; }
+            .text-lg-justify { text-align: justify; }
+        }
+    </style>
+    {% block head %}
+    {% endblock head %}
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <span class="navbar-brand" href="{% url 'portplow:scan-list' %}">
+                <img src="{% static "images/minis_logo.png" %}">
+                {% comment %}PortPlow{% endcomment %}</span>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="{% url 'portplow:scan-list' %}">Scans</a></li>
+                <li><a href="{% url 'portplow:profile-list' %}">Profiles</a></li>
+                <li><a href="{% url 'portplow:scanner-list' %}">Scanners</a></li>
+                {% comment %}<li><a href="">Results</a></li>{% endcomment %}
+                {% if request.user.is_superuser %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                           aria-expanded="false">Administration <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'portplow:user-list' %}">Users</a></li>
+                            <li><a href="{% url 'portplow:group-list' %}">Groups</a></li>
+                            <li><a href="{% url 'portplow:user-logs' %}">User Logs</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+            {% comment %}<ul class="nav navbar-nav navbar-right">
+                <li>
+                    <form class="navbar-form navbar-left" role="search">
+                        <div class="form-group">
+                            <input type="text" class="form-control" placeholder="Search by IP">
+                        </div>
+                        <button type="submit" class="btn btn-default">Search</button>
+                    </form>
+                </li>
+            </ul>{% endcomment %}
+        </div><!--/.nav-collapse -->
+    </div>
+</nav>
+<div class="container">
+
+    {% block breadcrumbs %}
+     {% comment %}   <ol class="breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li><a href="#">Scans</a></li>
+            <li class="active">Data</li>
+        </ol>{% endcomment %}
+    {% endblock breadcrumbs %}
+
+    {% block messages %}
+        <!-- code for displaying success or error message in template -->
+        {% if messages %}
+            {% for message in messages %}
+
+                <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert">
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
+    {% block content %}
+    {% endblock content %}
+
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted">
+            PortPlow is a <a href="http://minis.io" target="_blank">MINIS, LLC</a> Project.<br />
+            <small>Logged in as {{ request.user.username }}. (<a href="{% url 'portplow:logout' %}">Logout</a>)</small>
+        </p>
+    </div>
+</footer>
+
+
+<script src="https://code.jquery.com/jquery-2.2.3.min.js"></script> 
+{% include 'session_security/all.html' %} 
+<!-- Latest compiled and minified JavaScript --> <script 
+src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" Next Previous integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+<script src="{% static "libs/moment.js" %}" type="text/javascript"></script>
+<script src="{% static "libs/bootstrap-daterangepicker/daterangepicker.js" %}" type="text/javascript"></script>
+{% block tail_js %}
+{% endblock %}
+
+</body>
+</html>

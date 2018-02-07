@@ -1,0 +1,64 @@
+{% extends "scanner/base.html" %}
+{% load staticfiles %}
+
+{% block title %}Scans{% endblock title %}
+
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li class="active">Scans</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Current Scans {% if request.user.is_superuser %}<a href="{% url 'portplow:scan-create' %}"><span class="btn btn-default btn-xs">New Scan</span></a>{% endif %}</h3>
+        </div>
+        <div class="panel-body">
+            {% if scans.count == 0 %}
+                No scans are listed in the database.
+            {% else %}
+            <table class="table table-responsive">
+                <thead>
+                <tr>
+                    <th class="col-xs-10 col-sm-3">Name</th>
+                    {% if request.user.is_superuser %}
+                    <th class="hidden-xs col-sm-2">Targets</th>
+                    <th class="hidden-xs col-sm-1">Group</th>
+                    {% else %}
+                    <th class="hidden-xs col-sm-3">Targets</th>
+                    {% endif %}
+                    <th class="hidden-xs col-sm-3">Profile</th>
+                    <th class="hidden-xs col-sm-1">Status</th>
+                    <th class="">Progress</th>
+                    {% if request.user.is_superuser %}<th class="col-xs-1">Actions</th>{% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for scan in scans %}
+                <tr>
+                    <td class="col-xs-10 col-sm-3"><a href="{% url 'portplow:scan-details' scan.id %}">{{ scan.name }}</a></td>
+                    {% if request.user.is_superuser %}
+                    <td class="hidden-xs col-sm-3">{{ scan.hosts }}</td>
+                    <td class="hidden-xs col-sm-1">{{ scan.group.name }}</td>
+                    {% else %}
+                    <td class="hidden-xs col-sm-4">{{ scan.hosts }}</td>
+                    {% endif %}
+                    <td class="hidden-xs col-sm-2">{{ scan.profile.name }}</td>
+                    <td class="hidden-xs col-sm-1">{{ scan.get_status_display }}</td>
+                    <td>{{ scan.progress.percentage }}</td>
+                    {% if request.user.is_superuser %}
+                    <td class="col-xs-1">
+                        {% if scan.status == scan.RUNNING or scan.status == scan.PENDING %}<a href="{% url 'portplow:scan-hold' scan.id %}" class="btn btn-danger btn-xs">Hold</a>{% endif %}
+                        {% if scan.status == scan.ON_HOLD %}<a href="{% url 'portplow:scan-resume' scan.id %}" class="btn btn-success btn-xs">Run</a>{% endif %}
+                    </td>{% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,304 @@
+{% extends "scanner/base.html" %}
+{% load staticfiles %}
+
+{% block head %}
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2016.1.412/styles/kendo.common.min.css"/>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2016.1.412/styles/kendo.bootstrap.min.css"/>
+{% endblock head %}
+
+{% block breadcrumbs %}
+    <ol class="breadcrumb">
+        <li><a href="/">Home</a></li>
+        <li><a href="{% url 'portplow:scan-list' %}">Scans</a></li>
+        <li class="active">{{ scan.name }}</li>
+    </ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    {# TODO: Emergency stop button/modal #}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Details</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Name</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">{{ scan.name }} ({{ scan.get_status_display }})</div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Profile</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">
+                    {{ scan.profile.name }}<br/>
+                    <em>{{ scan.profile.tool }} {{ scan.profile.command }}</em>
+                </div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Targets</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">{{ scan.hosts|linebreaksbr }}</div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Parameters</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">Scan {{ scan.chunk_size }} IPs per scanner
+                    using {{ scan.scanner_count }} scanners
+                </div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Dates</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">{{ scan.start_date }} to {{ scan.stop_date }}</div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Hours</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">{{ scan.scan_hours|default:"not restricted" }}</div>
+            </div>
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Progress</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-11 col-sm-10 text-left">{{ scan.progress.percentage }} ({{ scan.progress.complete }}
+                    complete, {{ scan.progress.pending }} pending, {{ scan.progress.killed }}
+                    failed, {{ scan.progress.retry }} up for retry, {{ scan.progress.executing }}
+                    executing, {{ scan.progress.hold }} on hold, {{ scan.progress.total }} total)
+                    <br>
+                    <small><em>* Totals are updated once every five minutes.</em></small>
+                </div>
+            </div>
+
+            {% if request.user.is_superuser %}
+                {% if scan.status == scan.RUNNING %}
+                    <div class="clearfix visible-xs-block"><br/></div>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Completion Estimate</strong></div>
+                        <div class="clearfix visible-xs-block"></div>
+                        <div class="col-xs-11 col-sm-10 text-left">{{ scan.estimate_remaining|date:"Y/m/d"  }}</div>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="clearfix visible-xs-block"><br/></div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-2 text-xs-left text-sm-right"><strong>Open Port Totals</strong></div>
+                <div class="clearfix visible-xs-block"></div>
+                <div class="col-xs-offset-1 visible-xs"></div>
+
+                <div class="col-xs-11 col-sm-10 text-left">
+                    <table class="table">
+                        <tr>
+                            <th>Port</th>
+                            <th>Total Open</th>
+                        </tr>
+                        {% for pc in port_counts %}
+                            <tr>
+                                <td class="col-xs-1 col-sm-1">{{ pc.port }}</td>
+                                <td>{{ pc.total }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Scanners</h3>
+        </div>
+        <div class="panel-body">
+            {% if request.user.is_superuser and scan.status == scan.RUNNING %}
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <a href="{% url 'portplow:scanner-add' scan_id=scan.id %}" class="btn btn-success btn-xs">Add
+                            Scanner</a>
+                    </div>
+                </div>
+            {% endif %}
+            {% if scan.scanners.count == 0 %}
+                No scanners are present for this scan.
+            {% else %}
+
+                <table class="table table-responsive">
+                    <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Status</th>
+                        <th>Last Seen</th>
+                        <th>Running Job</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for scanner in scan.scanners.all|dictsort:"status" %}
+                        <tr>
+                            <td class="col-md-2">
+                                {% if request.user.is_superuser %}
+                                    {% if scanner.status == scanner.ACTIVE %}
+                                        <a data-id="{{ scanner.id }}" data-ip="{{ scanner.ip }}" href="#" data-toggle="modal" data-target="#confirm-delete"><i class="fa fa-minus-square" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                    {% endif %}
+                                {% endif %}
+                                {% if scanner.ip == None %}
+                                Unknown
+                                {% else %}
+                                    {% if scanner.status == scanner.ACTIVE %}
+                                        <a href="http://{{ scanner.ip }}" target="_blank">{{ scanner.ip }}</a>
+                                    {% else %}
+                                        {{ scanner.ip }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td class="col-md-1">{{ scanner.get_status_display }}</td>
+                            <td class="col-md-2">
+                                <span class="hidden-xs">{{ scanner.last_seen|date:"Y/m/d" }} {{ scanner.last_seen|time:"H:i:s" }}</span>
+                                <span class="visible-xs">{{ scanner.last_seen|date:"y/m/d" }}<br/>{{ scanner.last_seen|time:"H:i:s" }}</span>
+                            </td>
+                            <td class="col-md-4">
+                                {% if scanner.executing_jobs.count == 0 %}
+                                    No running jobs.
+                                {% endif %}
+                                {% for job in scanner.executing_jobs.all %}
+                                    {{ job.id }}
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            {% endif %}
+        </div>
+    </div>
+    {% if request.user.is_superuser %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Jobs</h3>
+            </div>
+            <div class="panel-body">
+                <div id="job_list"></div>
+            </div>
+        </div>
+
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Reporting</h3>
+            </div>
+            <div class="panel-body text-center">
+                <a href="{% url 'portplow:scan-process' scan_id=scan.id %}" class="btn btn-xs btn-default">Parse Results</a>
+                <a href="{% url 'portplow:scan-export' scan_id=scan.id %}" class="btn btn-xs btn-default">Export XML</a>
+                <a href="{% url 'portplow:scan-report' scan_id=scan.id %}" class="btn btn-xs btn-default">Scan Report</a>
+            </div>
+        </div>
+
+        <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Decommission Server</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <p>You are about to decomission a scanner.</p>
+                        <p>Do you want to proceed?</p>
+                        <p class="debug-url"></p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <a class="btn btn-danger btn-ok">Decomission</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    {% endif %}
+
+{% endblock %}
+
+{% block tail_js %}
+    {% if request.user.is_superuser %}
+        <script type="text/javascript" src="https://kendo.cdn.telerik.com/2016.1.412/js/kendo.all.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#job_list").kendoGrid({
+
+                    dataSource: {
+                        //type: "json",
+                        transport: {
+                            read: {
+                                url: "{% url 'api:joblog-list' %}",
+                                dataType: "json",
+                                data: {
+                                    scan: "{{ scan.id }}"
+                                }
+                            }
+                        },
+                        schema: {
+                            data: "results",
+                            total: "count",
+                            model: {
+                                fields: {
+                                    id: {type: "string"},
+                                    start_time: {type: "date"},
+                                    end_time: {type: "date"},
+                                    return_code: {type: "integer"},
+                                    attempt: {type: "integer"},
+                                    parsed: {type: "boolean"},
+                                    "scanner.ip": {type: "string"},
+                                    //command: {type: "string"},
+                                    //target_hosts: {type: "string"},
+                                    //scanner_lock: {type: "string"},
+                                    //scan: {type: "string"},
+                                }
+                            }
+                        },
+                        pageSize: 250,
+                        serverPaging: true,
+                        serverFiltering: true,
+                        serverSorting: true,
+                    },
+                    allowCopy: true,
+                    height: 550,
+                    //filterable: true,
+                    //sortable: true,
+                    pageable: {
+                        refresh: true,
+                        //pageSizes: true,
+                    },
+                    columns: [
+                        {field: "id", title: "Log ID"},
+                        {field: "start_time", title: "Start Time"},
+                        {field: "end_time", title: "End Time"},
+                        {field: "return_code", title: "Return Code"},
+                        {field: "parsed", title: "Parsed"},
+                        {field: "scanner.ip", title: "Source IP", name: "scanner"},
+                    ]
+                });
+            });
+        </script>
+        <script>
+            function set_remove_url(id) {
+              var tmp_id = "{{ scan.id }}";
+              var target_url = "{% url 'portplow:scanner-remove' scanner_id=scan.id %}";
+              return target_url.replace(tmp_id, id)
+            }
+
+            $('#confirm-delete').on('show.bs.modal', function(e) {
+                $(this).find('.btn-ok').attr('href', set_remove_url($(e.relatedTarget).data('id')));
+                var ip = $(e.relatedTarget).data('ip');
+                $('.debug-url').html('Scanner IP: <strong>' + ip + '</strong>');
+            });
+        </script>
+    {% endif %}
+{% endblock %}

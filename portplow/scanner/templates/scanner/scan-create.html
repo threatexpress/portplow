@@ -1,0 +1,43 @@
+{% extends 'scanner/base.html' %}
+{% load staticfiles %}
+{% load bootstrap3 %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add Scan{% endblock title %}
+
+
+{% block header %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+    <li><a href="/">Home</a></li>
+    <li><a href="{% url 'portplow:scan-list' %}">Scans</a></li>
+    <li class="active">Add Scan</li>
+</ol>
+{% endblock breadcrumbs %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>{% if update %}Update{% else %}Add{% endif %} <span class="text-light-gray">Scan</span></h1>
+    </div>
+        {% crispy form %}
+
+{% endblock %}
+
+{% block tail_js %}
+
+    <script type="text/javascript">
+        $(function () {
+             $('.dtrange').daterangepicker({
+                 autoApply: true
+             });
+
+            $('.dtrange').on('apply.daterangepicker', function(ev, picker) {
+                $("#id_start_date").val(picker.startDate.format('YYYY-MM-DD'));
+                $("#id_stop_date").val(picker.endDate.format('YYYY-MM-DD'));
+            });
+
+        });
+    </script>
+{% endblock %}
