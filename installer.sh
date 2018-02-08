@@ -59,7 +59,7 @@ ln -s /opt/portplow/configs/etc/nginx/sites-available/default /etc/nginx/sites-e
 # Copy the config template over
 cp /opt/portplow/configs/portplow.conf.default ~portplow/.portplow.conf
 
-# Make sure the portplow user has access.
+# Make sure the portplow user has access
 chown -R portplow:www-data /opt/portplow/
 
 # Setup SSL encryption
@@ -72,7 +72,7 @@ SECRET_KEY=$(random_password)
 DB_PASS=$(random_password)
 PUB_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 
-# Replace variables in the configuration file.
+# Replace variables in the configuration file
 PORTPLOW_CONFIG=/opt/portplow/.portplow.conf
 sed -i "s/--api-token--/$API_TOKEN/" /opt/portplow/.portplow.conf
 sed -i "s/--public-ip--/$PUB_IP/g" /opt/portplow/.portplow.conf

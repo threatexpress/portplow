@@ -1,7 +1,6 @@
 # PortPlow.io
 
-Manage large-scale distributed scans with a web frontend.  This project was built to be
-run on DigitalOcean on a 2-4GB ram system.
+Manage large-scale distributed scans with a web front end.  This project was built to be run on a DigitalOcean 2-4GB RAM system.
 
 ## Setup instructions
   - Setup DNS A record pointing to your DigitalOcean Droplet.
